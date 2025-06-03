@@ -1,17 +1,19 @@
-# 📚 TeleTeach – API de Cursos y Progreso
+# 📘 TeleTeach – API de Cursos y Progreso
 
-Este repositorio contiene el microservicio responsable de la gestión de cursos, visualización de contenido y seguimiento del progreso del usuario dentro del sistema **TeleTeach**.
+Este repositorio contiene el microservicio `courses-api-teleteach`, responsable de gestionar los cursos disponibles en la plataforma **TeleTeach** y registrar el progreso individual de los usuarios.
 
-Forma parte del desarrollo del curso **Ingeniería de Software 2 – 2025-1** y está basado en una arquitectura SOFEA.
+Forma parte del proyecto **TeleTeach**, desarrollado como parte del curso _Ingeniería de Software 2 – 2025-1_, bajo una arquitectura tipo SOFEA (Start-end Only Front-End Architecture).
 
 ---
 
 ## 🚀 Tecnologías utilizadas
 
 - Python 3.11+
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [Uvicorn](https://www.uvicorn.org/)
-- Mock DB (diccionarios en memoria o archivo JSON para el MVP)
+- FastAPI
+- Uvicorn
+- MongoDB (conexión vía `motor`)
+- Pydantic para validación
+- Dotenv para configuración por entorno
 
 ---
 
@@ -24,35 +26,70 @@ cd courses-api-teleteach
 
 # Crea un entorno virtual
 python -m venv venv
-source venv/bin/activate  # En Windows: .\venv\Scripts\activate
+# En Linux/macOS
+source venv/bin/activate
+# En Windows
+venv\Scripts\activate
 
-# Instala dependencias
+# Instala las dependencias
 pip install -r requirements.txt
 
+# Crea el archivo .env si no existe
+cp .env.example .env
+
 # Ejecuta el servidor
-uvicorn main:app --reload --port 8001
+uvicorn app.main:app --reload --port 8001
+```
+
+---
+
+## 📦 Estructura del Proyecto
+
+```
+courses-api-teleteach/
+├── app/
+│   ├── main.py              # Configuración principal y arranque del servidor
+│   ├── core/
+│   │   └── db.py            # Conexión a MongoDB
+│   ├── models/
+│   │   └── course.py        # Modelos de datos con Pydantic
+│   ├── routes/
+│   │   └── courses.py       # Endpoints relacionados con cursos y progreso
+├── .env.example             # Plantilla de configuración
+├── requirements.txt         # Dependencias del proyecto
+└── README.md                # Este archivo
 ```
 
 ---
 
 ## 📋 Endpoints principales
 
-| Método | Ruta                                       | Función                                  |
-|--------|--------------------------------------------|-------------------------------------------|
-| GET    | `/api/courses/`                            | Listar todos los cursos disponibles       |
-| GET    | `/api/courses/{id}`                        | Obtener detalles de un curso              |
-| POST   | `/api/courses/{id}/progress`               | Registrar progreso del usuario en curso   |
-| GET    | `/api/courses/user/{user_id}/progress`     | Ver progreso acumulado del usuario        |
+| Método | Ruta                               | Funcionalidad                           |
+|--------|------------------------------------|------------------------------------------|
+| GET    | `/api/courses`                     | Listar todos los cursos disponibles      |
+| GET    | `/api/courses/{course_id}`         | Obtener detalle de un curso             |
+| POST   | `/api/courses/{course_id}/progress`| Registrar progreso (correo, score, etc) |
 
-Puedes explorar la documentación Swagger en:
-
+Documentación Swagger disponible en:
 ```
 http://localhost:8001/docs
 ```
 
 ---
 
-## 🔗 Otros Repositorios del Proyecto TeleTeach
+## 📂 Variables de entorno (.env)
+
+```env
+MONGO_URL=mongodb://localhost:27017
+MONGO_DB=teleteach
+API_NAME=TeleTeach - API de Cursos
+API_VERSION=0.1.0
+ALLOWED_ORIGINS=http://localhost:5173
+```
+
+---
+
+## 🔗 Repositorios relacionados
 
 - [Frontend TeleTeach](https://github.com/javiierbarco/frontend-teleteach)
 - [API de Autenticación](https://github.com/javiierbarco/auth-api-teleteach)
@@ -68,9 +105,3 @@ http://localhost:8001/docs
 - Juan D. Rivera B.  
 - Victor M. Torres A.  
 - Wullfredo J. Barco G.
-
----
-
-## 📜 Licencia
-
-Uso académico – Universidad Nacional de Colombia – Ingeniería de Sistemas y Computación – 2025-1
