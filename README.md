@@ -24,11 +24,12 @@ Forma parte del proyecto **TeleTeach**, desarrollado como parte del curso _Ingen
 git clone https://github.com/javiierbarco/courses-api-teleteach.git
 cd courses-api-teleteach
 
-# Crea un entorno virtual
+# En Linux/macOS: Crear un entorno virtual
 python -m venv venv
-# En Linux/macOS
 source venv/bin/activate
-# En Windows
+
+# En Windows: Crear un entorno virtual
+python -m venv venv
 venv\Scripts\activate
 
 # Instala las dependencias
