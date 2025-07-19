@@ -1,21 +1,36 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRoute
 from dotenv import load_dotenv
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 import os
+import time
+from starlette.responses import Response as StarletteResponse
 
 from app.routes.courses import router as courses_router
 
-# Cargar variables de entorno desde .env
+# === PROMETHEUS METRICS ===
+REQUEST_COUNTER = Counter(
+    "http_requests_total", "Total de peticiones HTTP", ["method", "endpoint"]
+)
+REQUEST_LATENCY = Histogram(
+    "http_request_duration_seconds", "Duración de peticiones HTTP", ["method", "endpoint"]
+)
+ERROR_COUNTER = Counter(
+    "http_request_errors_total", "Errores HTTP por endpoint", ["method", "endpoint", "status"]
+)
+
+# === CARGA DE VARIABLES ===
 load_dotenv()
 
-# Crear la app FastAPI
+# === CREACIÓN DE LA APP ===
 app = FastAPI(
     title=os.getenv("API_NAME", "TeleTeach - API de Cursos"),
     description="API para gestión de cursos y seguimiento de progreso de usuarios docentes",
     version=os.getenv("API_VERSION", "0.1.0")
 )
 
-# Configurar CORS
+# === CORS ===
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
@@ -24,13 +39,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir rutas
+# === INSTRUMENTACIÓN CON MIDDLEWARE ===
+@app.middleware("http")
+async def prometheus_metrics_middleware(request: Request, call_next):
+    start_time = time.time()
+    response: Response = await call_next(request)
+    process_time = time.time() - start_time
+
+    method = request.method
+    endpoint = request.url.path
+    status = response.status_code
+
+    REQUEST_COUNTER.labels(method=method, endpoint=endpoint).inc()
+    REQUEST_LATENCY.labels(method=method, endpoint=endpoint).observe(process_time)
+    if status >= 400:
+        ERROR_COUNTER.labels(method=method, endpoint=endpoint, status=str(status)).inc()
+
+    return response
+
+# === ENDPOINT PARA MÉTRICAS PROMETHEUS ===
+@app.get("/metrics")
+def metrics():
+    return StarletteResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+# === RUTAS ===
 app.include_router(courses_router)
-
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # o ['http://localhost:5173']
-    allow_methods=["*"],
-    allow_headers=["*"],
-)

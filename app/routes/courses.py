@@ -38,3 +38,7 @@ async def obtener_progreso_usuario(user_id: str):
         del progreso["_id"]
         return progreso
     raise HTTPException(status_code=404, detail="Progreso no encontrado")
+
+@router.route('/error')
+def error():
+    return "Algo falló", 500
