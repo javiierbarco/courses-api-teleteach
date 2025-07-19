@@ -44,4 +44,12 @@ async def obtener_progreso_usuario(user_id: str):
         progreso["id"] = str(progreso["_id"])  # Convierte ObjectId a string
         del progreso["_id"]                   # Elimina el campo original
         return progreso
+<<<<<<< HEAD
+    raise HTTPException(status_code=404, detail="Progreso no encontrado")
+
+@router.route('/error')
+def error():
+    return "Algo falló", 500
+=======
     raise HTTPException(status_code=404, detail="Progreso no encontrado")  # Error si no se encuentra
+>>>>>>> 6859b74712d4a5b3a0a0fde55d292d840353df97
