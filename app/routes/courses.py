@@ -1,9 +1,19 @@
 from fastapi import APIRouter, HTTPException                 # Importa enrutador de FastAPI y excepciones HTTP
 from app.core.db import db                                  # Importa la conexión a la base de datos
 from app.models.course import Course, UserProgress, ProgressUpdate  # Importa los modelos de datos
+from app.models.course import CourseCreate  # Nuevo modelo para creación
+from fastapi import Body
 from bson import ObjectId                                   # Importa ObjectId para trabajar con IDs de MongoDB
 
 router = APIRouter()  # Crea el enrutador para las rutas de cursos
+
+@router.post("/api/courses")
+async def create_course(course: CourseCreate = Body(...)):
+    result = await db["courses"].insert_one(course.dict())
+    return {
+        "message": "Curso creado exitosamente",
+        "id": str(result.inserted_id)
+    }
 
 # Ruta GET para obtener todos los cursos
 @router.get("/api/courses", response_model=list[Course])
@@ -44,12 +54,30 @@ async def obtener_progreso_usuario(user_id: str):
         progreso["id"] = str(progreso["_id"])  # Convierte ObjectId a string
         del progreso["_id"]                   # Elimina el campo original
         return progreso
-<<<<<<< HEAD
     raise HTTPException(status_code=404, detail="Progreso no encontrado")
+
+@router.delete("/api/courses/{id}")
+async def delete_course(id: str):
+    result = await db["courses"].delete_one({"_id": ObjectId(id)})
+    if result.deleted_count == 1:
+        return {"message": f"Curso con ID {id} eliminado"}
+    raise HTTPException(status_code=404, detail="Curso no encontrado")
+
+@router.delete("/api/progress/{progress_id}")
+async def delete_progress(progress_id: str):
+    result = await db["progress"].delete_one({"_id": ObjectId(progress_id)})
+    if result.deleted_count == 1:
+        return {"message": f"Progreso con ID {progress_id} eliminado"}
+    raise HTTPException(status_code=404, detail="Progreso no encontrado")
+
+@router.delete("/api/courses/user/{user_id}/progress")
+async def delete_user_progress(user_id: str):
+    result = await db["user_progress"].delete_one({"user_id": user_id})
+    if result.deleted_count == 1:
+        return {"message": f"Progreso de usuario {user_id} eliminado"}
+    raise HTTPException(status_code=404, detail="Progreso del usuario no encontrado")
+
 
 @router.route('/error')
 def error():
     return "Algo falló", 500
-=======
-    raise HTTPException(status_code=404, detail="Progreso no encontrado")  # Error si no se encuentra
->>>>>>> 6859b74712d4a5b3a0a0fde55d292d840353df97

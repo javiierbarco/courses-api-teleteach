@@ -11,6 +11,11 @@ class Course(BaseModel):
     description: str           # Descripción del contenido del curso
     level: str = "básico"      # Nivel del curso, por defecto es "básico"
 
+class CourseCreate(BaseModel):
+    title: str
+    description: str
+    level: str
+
 # Modelo que representa el progreso del usuario en un tema específico del curso
 class ProgressUpdate(BaseModel):
     topic: str                 # Nombre o identificador del tema dentro del curso
